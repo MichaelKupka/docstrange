@@ -34,11 +34,21 @@ DocStrange converts documents to Markdown, JSON, CSV, and HTML quickly and accur
 
 
 ## Processing Modes
-> **☁️ Free Cloud Processing upto 10000 docs per month !**  
-> Extract documents data instantly with the cloud processing - no complex setup needed 
+> **☁️ Free Cloud Processing upto 10000 docs per month !**
+> Extract documents data instantly with the cloud processing - no complex setup needed
 
-> **🔒 Local Processing !**  
+> **🔒 Local Processing !**
 > Use `cpu` or `gpu` mode for 100% local processing - no data sent anywhere, everything stays on your machine.
+
+### Cloud vs. Local: Which Mode Should You Pick?
+
+| Scenario | Cloud Processing | Local Processing |
+| --- | --- | --- |
+| **Setup & Maintenance** | Zero-install, DocStrange hosts the models and updates for you. | Requires downloading models and dependencies once, you control updates. |
+| **Speed & Scale** | Auto-scales for bursts of documents and handles heavy PDFs without taxing your hardware. | Performance depends on your machine; great for steady workloads and when you can dedicate GPU/CPU cores. |
+| **Privacy & Compliance** | Data travels to the DocStrange cloud – best for public docs or when you are comfortable with hosted services. | 100% on-device processing, ideal for confidential, regulated, or air-gapped environments. |
+| **Operating Cost** | Free tier (10k docs/mo) with pay-as-you-go beyond that – no hardware to manage. | No per-document fees, but you shoulder compute costs and electricity. |
+| **Advanced OCR Options** | Uses DocStrange's managed neural OCR stack out of the box. | Lets you plug in custom OCR like Google Vision or local neural OCR via `ocr_provider`. |
 
 
 ## **What's New**
@@ -194,6 +204,43 @@ extractor = DocumentExtractor(cpu=True)
 # Force local GPU processing (requires CUDA)
 extractor = DocumentExtractor(gpu=True)
 ```
+
+### Built-in Neural OCR (výchozí)
+
+DocStrange má vlastní "neural" OCR backend postavený na [docling](https://github.com/NanoNets/docling) modelech. Ten se používá
+automaticky pokaždé, když spustíte extrakci lokálně (například `DocumentExtractor(cpu=True)` nebo `gpu=True`) a nevyberete jiného
+poskytovatele přes `ocr_provider`. Co od něj čekat:
+
+- **Plně offline**: modely se při prvním spuštění stáhnou do lokální cache a následně běží bez připojení k internetu.
+- **Layout + tabulky**: využívá oddělené layout a table detektory, takže výsledný Markdown zachová strukturu dokumentu.
+- **Chytré fallbacky**: pokud se nepodaří stáhnout pokročilé modely (například kvůli chybějícímu Hugging Face tokenu), pipeline
+  spadne do základního režimu a zpracování přesto proběhne.
+- **Konfigurace**: výchozí poskytovatel je `neural`, což lze kdykoli změnit (`DocumentExtractor(cpu=True, ocr_provider="nanonets")`).
+
+Pokud chcete využít Hugging Face mirror s privátním tokenem, přihlaste se příkazem `huggingface-cli login` ještě před prvním
+spuštěním. Tím docílíte rychlejšího stažení modelů a vyhnete se limitům anonymního přístupu.
+
+### Use Google Cloud Vision OCR (Beta)
+
+Prefer Google's OCR stack? You can plug it into DocStrange's local pipeline.
+
+```bash
+pip install "docstrange[google-ocr]"
+export GOOGLE_APPLICATION_CREDENTIALS=/path/to/your/service-account.json
+```
+
+Then initialize the extractor with the Google provider:
+
+```python
+from docstrange import DocumentExtractor
+
+extractor = DocumentExtractor(cpu=True, ocr_provider="google")
+result = extractor.extract("scan.jpg")
+print(result.extract_markdown())
+```
+
+DocStrange automatically falls back to its built-in neural OCR if Google Vision
+is not available or returns an error.
 
 ---
 

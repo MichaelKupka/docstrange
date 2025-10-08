@@ -10,7 +10,7 @@ from .image_processor import ImageProcessor
 from ..result import ConversionResult
 from ..exceptions import ConversionError, FileNotFoundError
 from ..config import InternalConfig
-from ..pipeline.ocr_service import OCRServiceFactory, NeuralOCRService
+from ..pipeline.ocr_service import OCRServiceFactory
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -19,10 +19,28 @@ logger = logging.getLogger(__name__)
 class PDFProcessor(BaseProcessor):
     """Processor for PDF files using PDF-to-image conversion with OCR."""
     
-    def __init__(self, preserve_layout: bool = True, include_images: bool = False, ocr_enabled: bool = True, use_markdownify: bool = None):
+    def __init__(
+        self,
+        preserve_layout: bool = True,
+        include_images: bool = False,
+        ocr_enabled: bool = True,
+        use_markdownify: bool = None,
+        ocr_service=None,
+    ):
         super().__init__(preserve_layout, include_images, ocr_enabled, use_markdownify)
         # Create a shared OCR service instance for all pages
-        shared_ocr_service = NeuralOCRService()
+        shared_ocr_service = None
+        if ocr_enabled:
+            if ocr_service is not None:
+                shared_ocr_service = ocr_service
+            else:
+                try:
+                    shared_ocr_service = OCRServiceFactory.create_service()
+                except Exception as e:
+                    logger.warning(
+                        "Failed to initialize OCR service for PDF processor: %s", e
+                    )
+                    shared_ocr_service = None
         self._image_processor = ImageProcessor(
             preserve_layout=preserve_layout,
             include_images=include_images,

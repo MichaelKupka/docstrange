@@ -75,6 +75,9 @@ local-llm = [
 web = [
     "Flask>=2.0.0",
 ]
+google-ocr = [
+    "google-cloud-vision>=3.4.0",
+]
 
 [project.scripts]
 docstrange = "docstrange.cli:main"

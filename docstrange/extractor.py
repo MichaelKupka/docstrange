@@ -35,7 +35,8 @@ class DocumentExtractor:
         api_key: Optional[str] = None,
         model: Optional[str] = None,
         cpu: bool = False,
-        gpu: bool = False
+        gpu: bool = False,
+        ocr_provider: Optional[str] = None
     ):
         """Initialize the file extractor.
         
@@ -47,6 +48,7 @@ class DocumentExtractor:
             model: Model to use for cloud processing (gemini, openapi) - only for cloud mode
             cpu: Force local CPU-only processing (disables cloud mode)
             gpu: Force local GPU processing (disables cloud mode, requires GPU)
+            ocr_provider: Preferred OCR provider for local processing
         
         Note:
             - Cloud mode is the default unless cpu or gpu is specified
@@ -59,6 +61,7 @@ class DocumentExtractor:
         self.model = model
         self.cpu = cpu
         self.gpu = gpu
+        self.ocr_provider = ocr_provider
         
         # Determine processing mode
         # Cloud mode is default unless CPU/GPU preference is explicitly set
@@ -158,14 +161,45 @@ class DocumentExtractor:
     
     def _setup_local_processors(self):
         """Setup local processors based on CPU/GPU preferences."""
+        from .pipeline.ocr_service import OCRServiceFactory
+
+        shared_ocr_service = None
+        if self.ocr_enabled:
+            try:
+                shared_ocr_service = OCRServiceFactory.create_service(self.ocr_provider)
+            except Exception as e:
+                if self.ocr_provider:
+                    logger.warning(
+                        "Failed to initialize OCR provider '%s': %s. Falling back to default.",
+                        self.ocr_provider,
+                        e,
+                    )
+                try:
+                    shared_ocr_service = OCRServiceFactory.create_service('neural')
+                except Exception as fallback_error:
+                    logger.error(
+                        "Failed to initialize fallback OCR provider: %s", fallback_error
+                    )
+                    shared_ocr_service = None
+
         local_processors = [
-            PDFProcessor(preserve_layout=self.preserve_layout, include_images=self.include_images, ocr_enabled=self.ocr_enabled),
+            PDFProcessor(
+                preserve_layout=self.preserve_layout,
+                include_images=self.include_images,
+                ocr_enabled=self.ocr_enabled,
+                ocr_service=shared_ocr_service,
+            ),
             DOCXProcessor(preserve_layout=self.preserve_layout, include_images=self.include_images),
             TXTProcessor(preserve_layout=self.preserve_layout, include_images=self.include_images),
             ExcelProcessor(preserve_layout=self.preserve_layout, include_images=self.include_images),
             HTMLProcessor(preserve_layout=self.preserve_layout, include_images=self.include_images),
             PPTXProcessor(preserve_layout=self.preserve_layout, include_images=self.include_images),
-            ImageProcessor(preserve_layout=self.preserve_layout, include_images=self.include_images, ocr_enabled=self.ocr_enabled),
+            ImageProcessor(
+                preserve_layout=self.preserve_layout,
+                include_images=self.include_images,
+                ocr_enabled=self.ocr_enabled,
+                ocr_service=shared_ocr_service,
+            ),
             URLProcessor(preserve_layout=self.preserve_layout, include_images=self.include_images),
         ]
         
