@@ -95,7 +95,7 @@ class ImageProcessor(BaseProcessor):
     def predownload_ocr_models():
         """Pre-download OCR models by running a dummy prediction."""
         try:
-            from docstrange.services.ocr_service import OCRServiceFactory
+            from docstrange.pipeline.ocr_service import OCRServiceFactory
             ocr_service = OCRServiceFactory.create_service()
             # Create a blank image for testing
             from PIL import Image

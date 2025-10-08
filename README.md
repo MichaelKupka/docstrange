@@ -195,6 +195,28 @@ extractor = DocumentExtractor(cpu=True)
 extractor = DocumentExtractor(gpu=True)
 ```
 
+### Use Google Cloud Vision OCR (Beta)
+
+Prefer Google's OCR stack? You can plug it into DocStrange's local pipeline.
+
+```bash
+pip install "docstrange[google-ocr]"
+export GOOGLE_APPLICATION_CREDENTIALS=/path/to/your/service-account.json
+```
+
+Then initialize the extractor with the Google provider:
+
+```python
+from docstrange import DocumentExtractor
+
+extractor = DocumentExtractor(cpu=True, ocr_provider="google")
+result = extractor.extract("scan.jpg")
+print(result.extract_markdown())
+```
+
+DocStrange automatically falls back to its built-in neural OCR if Google Vision
+is not available or returns an error.
+
 ---
 
 ## Local Web Interface
