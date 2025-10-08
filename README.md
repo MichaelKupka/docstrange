@@ -34,11 +34,21 @@ DocStrange converts documents to Markdown, JSON, CSV, and HTML quickly and accur
 
 
 ## Processing Modes
-> **☁️ Free Cloud Processing upto 10000 docs per month !**  
-> Extract documents data instantly with the cloud processing - no complex setup needed 
+> **☁️ Free Cloud Processing upto 10000 docs per month !**
+> Extract documents data instantly with the cloud processing - no complex setup needed
 
-> **🔒 Local Processing !**  
+> **🔒 Local Processing !**
 > Use `cpu` or `gpu` mode for 100% local processing - no data sent anywhere, everything stays on your machine.
+
+### Cloud vs. Local: Which Mode Should You Pick?
+
+| Scenario | Cloud Processing | Local Processing |
+| --- | --- | --- |
+| **Setup & Maintenance** | Zero-install, DocStrange hosts the models and updates for you. | Requires downloading models and dependencies once, you control updates. |
+| **Speed & Scale** | Auto-scales for bursts of documents and handles heavy PDFs without taxing your hardware. | Performance depends on your machine; great for steady workloads and when you can dedicate GPU/CPU cores. |
+| **Privacy & Compliance** | Data travels to the DocStrange cloud – best for public docs or when you are comfortable with hosted services. | 100% on-device processing, ideal for confidential, regulated, or air-gapped environments. |
+| **Operating Cost** | Free tier (10k docs/mo) with pay-as-you-go beyond that – no hardware to manage. | No per-document fees, but you shoulder compute costs and electricity. |
+| **Advanced OCR Options** | Uses DocStrange's managed neural OCR stack out of the box. | Lets you plug in custom OCR like Google Vision or local neural OCR via `ocr_provider`. |
 
 
 ## **What's New**
@@ -194,6 +204,7 @@ extractor = DocumentExtractor(cpu=True)
 # Force local GPU processing (requires CUDA)
 extractor = DocumentExtractor(gpu=True)
 ```
+
 
 ### Use Google Cloud Vision OCR (Beta)
 
