@@ -205,20 +205,6 @@ extractor = DocumentExtractor(cpu=True)
 extractor = DocumentExtractor(gpu=True)
 ```
 
-### Built-in Neural OCR (výchozí)
-
-DocStrange má vlastní "neural" OCR backend postavený na [docling](https://github.com/NanoNets/docling) modelech. Ten se používá
-automaticky pokaždé, když spustíte extrakci lokálně (například `DocumentExtractor(cpu=True)` nebo `gpu=True`) a nevyberete jiného
-poskytovatele přes `ocr_provider`. Co od něj čekat:
-
-- **Plně offline**: modely se při prvním spuštění stáhnou do lokální cache a následně běží bez připojení k internetu.
-- **Layout + tabulky**: využívá oddělené layout a table detektory, takže výsledný Markdown zachová strukturu dokumentu.
-- **Chytré fallbacky**: pokud se nepodaří stáhnout pokročilé modely (například kvůli chybějícímu Hugging Face tokenu), pipeline
-  spadne do základního režimu a zpracování přesto proběhne.
-- **Konfigurace**: výchozí poskytovatel je `neural`, což lze kdykoli změnit (`DocumentExtractor(cpu=True, ocr_provider="nanonets")`).
-
-Pokud chcete využít Hugging Face mirror s privátním tokenem, přihlaste se příkazem `huggingface-cli login` ještě před prvním
-spuštěním. Tím docílíte rychlejšího stažení modelů a vyhnete se limitům anonymního přístupu.
 
 ### Use Google Cloud Vision OCR (Beta)
 
